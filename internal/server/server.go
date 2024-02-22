@@ -16,6 +16,7 @@ func SetupRouter(opt *HandlerOpts) *gin.Engine {
 	router.Use(middleware.HandleError)
 
 	router.POST("/users", opt.User.CreateUser)
+	router.POST("/login", opt.User.Login)
 
 	return router
 

@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"log"
 	"net/http"
+	"os"
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/dto"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
@@ -48,4 +50,38 @@ func (h *UserHandler) CreateUser(ctx *gin.Context) {
 			User: userJson,
 		},
 	})
+}
+
+func (h *UserHandler) Login(ctx *gin.Context) {
+	var body dto.LoginBody
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		errType := utils.CheckError(err.Error())
+		ctx.AbortWithStatusJSON(http.StatusBadRequest,
+			dto.Response{
+				Msg:  errType,
+				Data: nil,
+			})
+		return
+	}
+	id, err := h.userUseCase.Login(ctx, entity.User{
+		Email:    body.Email,
+		Password: body.Password,
+	})
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	jwtToken, err := utils.CreateAndSign(id, os.Getenv("SECRET_KEY"))
+	log.Printf("id : %v", id)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dto.Response{
+		Msg: "OK",
+		Data: dto.UserToken{
+			Token: jwtToken,
+		},
+	})
+
 }

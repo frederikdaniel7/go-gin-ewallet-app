@@ -4,9 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"log"
-	"net/http"
-
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
 )
 
 type transactor struct {
@@ -60,7 +57,7 @@ func (tr *transactor) WithinTransaction(ctx context.Context, tFunc func(ctx cont
 
 	tx, err := tr.db.Begin()
 	if err != nil {
-		return apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	err = tFunc(injectTx(ctx, tx))
@@ -69,7 +66,7 @@ func (tr *transactor) WithinTransaction(ctx context.Context, tFunc func(ctx cont
 		if errRollback := tx.Rollback(); errRollback != nil {
 			log.Printf("rollback transaction: %v", errRollback)
 		}
-		return apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error())
+		return err
 	}
 	if errCommit := tx.Commit(); errCommit != nil {
 		log.Printf("commit transaction: %v", errCommit)
