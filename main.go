@@ -7,6 +7,7 @@ import (
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/repository"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/server"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/usecase"
+	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/database"
 )
 
 func main() {
@@ -17,8 +18,9 @@ func main() {
 
 	userRepository := repository.NewUserRepository(db)
 	walletRepository := repository.NewWalletRepository(db)
+	transactor := database.NewTransaction(db)
 
-	userUseCase := usecase.NewUserUseCaseImpl(userRepository, walletRepository)
+	userUseCase := usecase.NewUserUseCaseImpl(userRepository, walletRepository, transactor)
 
 	userHandler := handler.NewUserHandler(userUseCase)
 
