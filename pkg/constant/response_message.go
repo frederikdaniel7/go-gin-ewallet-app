@@ -5,7 +5,11 @@ const (
 	ResponseMsgErrorInternal = "Internal Server Error"
 	ResponseMsgBadRequest    = "Bad Request"
 	ResponseMsgInvalidBody   = "Invalid Body"
+	ResponseMsgInvalidPasswordInput = "Password minimum length must be at least 8 characters"
+	ResponseMsgInvalidEmailInput = "Put the correct email format"
+	
 	ResponseMsgUnauthorized  = "Unauthorized"
+	ResponseMsgCreated       = "Created"
 
 	ResponseMsgUserAlreadyExists = "user already exists"
 

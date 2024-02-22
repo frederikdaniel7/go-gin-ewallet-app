@@ -59,7 +59,7 @@ func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*en
 		if err == sql.ErrNoRows {
 			return &user, nil
 		}
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error())
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
 	}
 	return &user, nil
 }

@@ -24,9 +24,10 @@ func NewUserHandler(userUseCase usecase.UserUseCase) *UserHandler {
 func (h *UserHandler) CreateUser(ctx *gin.Context) {
 	var body dto.CreateUser
 	if err := ctx.ShouldBindJSON(&body); err != nil {
+		errType := utils.CheckError(err.Error())
 		ctx.AbortWithStatusJSON(http.StatusBadRequest,
 			dto.Response{
-				Msg:  constant.ResponseMsgBadRequest,
+				Msg:  errType,
 				Data: nil,
 			})
 		return
