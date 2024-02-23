@@ -16,3 +16,11 @@ type CreatePasswordToken struct {
 type PassTokenObj struct {
 	Token PasswordToken `json:"token"`
 }
+
+type ResetPassword struct {
+	Password string `json:"password" binding:"required,min=8"`
+}
+
+type PasswordTokenParam struct {
+	Token string `uri:"token" binding:"required"`
+}

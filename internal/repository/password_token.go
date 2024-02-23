@@ -85,14 +85,17 @@ func (r *passwordTokenRepository) UpdateDeleteToken(ctx context.Context, body *e
 func (r *passwordTokenRepository) GetValidToken(ctx context.Context, token string) (*entity.PasswordToken, error) {
 	passToken := entity.PasswordToken{}
 	runner := database.PickQuerier(ctx, r.db)
-	q := `SELECT id, user_id, token, expired_at, created_at, updated_at, deleted_at from password_tokens where token = $1 and expired_at < now()`
 
-	err := runner.QueryRowContext(ctx, q, token).Scan(&passToken.ID, &passToken.UserID, &passToken.Token, &passToken.ExpiredAt, &passToken.CreatedAt, &passToken.UpdatedAt, &passToken.DeletedAt)
+	q := `SELECT id, user_id, token from password_tokens where token = $1 and expired_at > now() and deleted_at is null`
+
+	err := runner.QueryRowContext(ctx, q, token).Scan(&passToken.ID, &passToken.UserID, &passToken.Token)
 	if err != nil {
 		if err == sql.ErrNoRows {
+
 			return &passToken, nil
 		}
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error())
 	}
+
 	return &passToken, nil
 }

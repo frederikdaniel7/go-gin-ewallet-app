@@ -15,7 +15,7 @@ import (
 type UserRepository interface {
 	// FindAll(ctx context.Context) ([]entity.User, error)
 	// FindSimilarUserByName(ctx context.Context, name string) ([]entity.User, error)
-	// FindUserById(ctx context.Context, id int64) (*entity.User, error)
+	FindUserById(ctx context.Context, id int64) (*entity.User, error)
 	FindUserByEmail(ctx context.Context, email string) (*entity.User, error)
 	CreateUser(ctx context.Context, body *entity.User) (*entity.User, error)
 	FindUserPassword(ctx context.Context, body *entity.User) (string, error)
@@ -64,6 +64,22 @@ func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*en
 	}
 	return &user, nil
 }
+
+func (r *userRepository) FindUserById(ctx context.Context, id int64) (*entity.User, error) {
+	var user entity.User
+	runner := database.PickQuerier(ctx, r.db)
+	q := `SELECT u.id, u.email, u.name, u.created_at, u.updated_at from users u where u.id = $1 `
+
+	err := runner.QueryRowContext(ctx, q, id).
+		Scan(&user.ID, &user.Email, &user.Name, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &user, nil
+		}
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error())
+	}
+	return &user, nil
+}
 func (r *userRepository) FindUserPassword(ctx context.Context, body *entity.User) (string, error) {
 
 	q := `SELECT password from users where email = $1 `
@@ -82,9 +98,13 @@ func (r *userRepository) FindUserPassword(ctx context.Context, body *entity.User
 
 func (r *userRepository) UpdateUserPassword(ctx context.Context, body *entity.User, password string) (*entity.User, error) {
 	var user entity.User
-	q := `UPDATE users SET password = $1 where email = $2 RETURNING id, email, name, created_at, updated_at`
+	q := `UPDATE users SET password = $1, updated_at = now() where email = $2 RETURNING id, email, name, created_at, updated_at`
+	hashedPassword, err := utils.HashPassword(password, 12)
+	if err != nil {
+		return nil, err
+	}
 
-	err := r.db.QueryRowContext(ctx, q, password, body.Email).Scan(&user.ID, &user.Email, &user.Name, &user.CreatedAt, &user.UpdatedAt)
+	err = r.db.QueryRowContext(ctx, q, hashedPassword, body.Email).Scan(&user.ID, &user.Email, &user.Name, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return &user, nil

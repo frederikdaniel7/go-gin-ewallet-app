@@ -5,6 +5,7 @@ const (
 	ResponseMsgErrorInternal = "Internal Server Error"
 	ResponseMsgBadRequest    = "Bad Request"
 	ResponseMsgInvalidBody   = "Invalid Body"
+	ResponseMsgInvalidToken   = "Invalid Token"
 	ResponseMsgInvalidPasswordInput = "Password minimum length must be at least 8 characters"
 	ResponseMsgInvalidEmailInput = "Put the correct email format"
 	

@@ -1,8 +1,8 @@
 package utils
 
 import (
+	"crypto/rand"
 	"encoding/base64"
-	"math/rand"
 )
 
 func generateRandomBytes(n int) ([]byte, error) {

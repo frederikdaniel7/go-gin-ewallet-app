@@ -16,6 +16,7 @@ type UserUseCase interface {
 	Login(ctx context.Context, body *entity.User) (int, error)
 	RegisterUser(ctx context.Context, body *entity.User) (*entity.UserDetail, error)
 	GenerateToken(ctx context.Context, body *entity.User) (*entity.PasswordToken, error)
+	ResetPassword(ctx context.Context, body *entity.PasswordToken, newPassword string) error
 }
 
 type userUseCaseImpl struct {
@@ -131,4 +132,34 @@ func (u *userUseCaseImpl) GenerateToken(ctx context.Context, body *entity.User) 
 		return nil, err
 	}
 	return token, nil
+}
+
+func (u *userUseCaseImpl) ResetPassword(ctx context.Context, body *entity.PasswordToken, newPassword string) error {
+
+	err := u.transactor.WithinTransaction(ctx, func(txCtx context.Context) error {
+		token, err := u.passwordTokenRepository.GetValidToken(txCtx, body.Token)
+		if token.UserID == 0 {
+			return apperror.NewCredentialsErrorType(http.StatusBadRequest, constant.ResponseMsgInvalidToken)
+		}
+		if err != nil {
+			return err
+		}
+		user, err := u.userRepository.FindUserById(txCtx, token.UserID)
+		if err != nil {
+			return err
+		}
+		_, err = u.userRepository.UpdateUserPassword(txCtx, user, newPassword)
+		if err != nil {
+			return err
+		}
+		_, err = u.passwordTokenRepository.UpdateDeleteToken(ctx, user, body.Token)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

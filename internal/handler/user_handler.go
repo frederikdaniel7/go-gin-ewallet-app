@@ -8,6 +8,7 @@ import (
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/dto"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/usecase"
+	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/constant"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/utils"
 	"github.com/gin-gonic/gin"
@@ -110,5 +111,37 @@ func (h *UserHandler) ForgotPassword(ctx *gin.Context) {
 		Data: dto.PassTokenObj{
 			Token: tokenJson,
 		},
+	})
+}
+
+func (h *UserHandler) ResetPassword(ctx *gin.Context) {
+	var body dto.ResetPassword
+	var tokenParam dto.PasswordTokenParam
+
+	err := ctx.ShouldBindUri(&tokenParam)
+	if err != nil {
+		apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgInvalidToken)
+		return
+	}
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		errType := utils.CheckError(err.Error())
+		ctx.AbortWithStatusJSON(http.StatusBadRequest,
+			dto.Response{
+				Msg:  errType,
+				Data: nil,
+			})
+		return
+	}
+	err = h.userUseCase.ResetPassword(ctx,
+		&entity.PasswordToken{
+			Token: tokenParam.Token,
+		}, body.Password)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, dto.Response{
+		Msg:  "Password changed",
+		Data: nil,
 	})
 }
