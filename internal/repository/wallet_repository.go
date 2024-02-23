@@ -48,7 +48,7 @@ func (r *walletRepository) FindWalletByUserID(ctx context.Context, userID int64)
 	wallet := entity.Wallet{}
 	runner := database.PickQuerier(ctx, r.db)
 
-	q := `SELECT id, user_id, wallet_number, balance, created_at, updated_at, deleted_at from wallets where user_id = $1`
+	q := `SELECT id, user_id, wallet_number, balance, created_at, updated_at, deleted_at from wallets where user_id = $1 FOR UPDATE`
 	err := runner.QueryRowContext(ctx, q, userID).Scan(&wallet.ID, &wallet.UserID, &wallet.WalletNumber, &wallet.Balance, &wallet.CreatedAt, &wallet.UpdatedAt, &wallet.DeletedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -63,7 +63,7 @@ func (r *walletRepository) FindWalletByWalletNumber(ctx context.Context, walletN
 	wallet := entity.Wallet{}
 	runner := database.PickQuerier(ctx, r.db)
 
-	q := `SELECT id, user_id, wallet_number, balance, created_at, updated_at, deleted_at from wallets where wallet_number = $1`
+	q := `SELECT id, user_id, wallet_number, balance, created_at, updated_at, deleted_at from wallets where wallet_number = $1 FOR UPDATE`
 
 	err := runner.QueryRowContext(ctx, q, walletNumber).Scan(&wallet.ID, &wallet.UserID, &wallet.WalletNumber, &wallet.Balance, &wallet.CreatedAt, &wallet.UpdatedAt, &wallet.DeletedAt)
 	if err != nil {
