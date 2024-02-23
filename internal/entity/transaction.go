@@ -27,4 +27,11 @@ type Transfer struct {
 }
 
 type TransactionFilter struct {
+	Search    string
+	SortBy    string
+	Order     string
+	Page      *int
+	Limit     *int
+	StartDate string
+	EndDate   string
 }

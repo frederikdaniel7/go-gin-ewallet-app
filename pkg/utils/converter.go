@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"strings"
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/dto"
@@ -52,4 +53,79 @@ func ConvertTransactiontoJson(transaction entity.Transaction) dto.Transaction {
 		UpdatedAt:         transaction.UpdatedAt,
 	}
 	return converted
+}
+
+func ConvertTransactionstoJson(transactions []entity.Transaction) []dto.Transaction {
+	transactionsJson := []dto.Transaction{}
+	for _, values := range transactions {
+		transactionsJson = append(transactionsJson, dto.Transaction{
+			ID:                values.ID,
+			SenderWalletID:    values.SenderWalletID,
+			RecipientWalletID: values.RecipientWalletID,
+			Amount:            values.Amount,
+			SourceOfFunds:     values.SourceOfFunds,
+			Descriptions:      values.Descriptions,
+			CreatedAt:         values.CreatedAt,
+			UpdatedAt:         values.UpdatedAt,
+		})
+	}
+	return transactionsJson
+}
+
+func ConvertQueryJsonToObject(queryParams dto.TransactionFilter) entity.TransactionFilter {
+	converted := entity.TransactionFilter{
+		Search:    queryParams.Search,
+		SortBy:    queryParams.SortBy,
+		Order:     queryParams.Order,
+		Page:      queryParams.Page,
+		Limit:     queryParams.Limit,
+		StartDate: queryParams.StartDate,
+		EndDate:   queryParams.EndDate,
+	}
+	return converted
+}
+
+func ConvertQueryParamstoSql(params entity.TransactionFilter) (string, []interface{}) {
+	var query strings.Builder
+
+	var filters []interface{}
+	var countParams = 2
+
+	if params.Search != "" {
+		query.WriteString(fmt.Sprintf(` AND t.descriptions ILIKE '%%' ||$%v|| '%%'`, countParams))
+		filters = append(filters, params.Search)
+		countParams++
+	}
+	if params.StartDate != "" {
+		query.WriteString(fmt.Sprintf(` AND t.created_at >= $%v`, countParams))
+		filters = append(filters, params.StartDate)
+		countParams++
+	}
+	if params.EndDate != "" {
+		query.WriteString(fmt.Sprintf(` AND t.created_at <= $%v`, countParams))
+		filters = append(filters, params.EndDate)
+		countParams++
+	}
+	if params.SortBy != "" {
+		switch params.SortBy {
+		case "to":
+			query.WriteString(` ORDER BY t.recipient_wallet_id`)
+		case "amount":
+			query.WriteString(` ORDER BY t.amount`)
+		case "date":
+			query.WriteString(` ORDER BY t.created_at`)
+		}
+	} else if params.SortBy == "" {
+		query.WriteString(` ORDER BY t.created_at`)
+	}
+	if params.Order != "" {
+		if params.Order == "asc" {
+			query.WriteString(` ASC`)
+		}
+		if params.Order == "desc" {
+			query.WriteString(` DESC`)
+		}
+	}
+	return query.String(), filters
+
 }

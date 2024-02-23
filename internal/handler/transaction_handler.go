@@ -91,3 +91,31 @@ func (h *TransactionHandler) TopUpBalance(ctx *gin.Context) {
 		Data: transactionJson,
 	})
 }
+
+func (h *TransactionHandler) GetTransactions(ctx *gin.Context) {
+	var params dto.TransactionFilter
+	transactionsJson := []dto.Transaction{}
+	userId := ctx.GetFloat64("id")
+	if err := ctx.ShouldBindQuery(&params); err != nil {
+		errType := utils.CheckError(err.Error())
+		ctx.AbortWithStatusJSON(http.StatusBadRequest,
+			dto.Response{
+				Msg:  errType,
+				Data: nil,
+			})
+		return
+	}
+	convertedParams := utils.ConvertQueryJsonToObject(params)
+	transactions, err := h.transactionUseCase.GetTransaction(ctx, convertedParams, int64(userId))
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	transactionsJson = utils.ConvertTransactionstoJson(transactions)
+
+	ctx.JSON(http.StatusOK, dto.Response{
+		Msg:  constant.ResponseMsgOK,
+		Data: dto.Transactions{Transactions: transactionsJson},
+	})
+
+}

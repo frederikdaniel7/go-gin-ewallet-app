@@ -15,6 +15,7 @@ import (
 type TransactionUseCase interface {
 	MakeTransfer(ctx context.Context, body *entity.Transfer, userID int64) (*entity.Transaction, error)
 	TopUpBalance(ctx context.Context, body *entity.Transfer, userID int64) (*entity.Transaction, error)
+	GetTransaction(ctx context.Context, params entity.TransactionFilter, userID int64) ([]entity.Transaction, error)
 }
 
 type transactionUseCaseImpl struct {
@@ -122,7 +123,7 @@ func (u *transactionUseCaseImpl) TopUpBalance(ctx context.Context, body *entity.
 		if err != nil {
 			return err
 		}
-		transaction, err = u.transactionRepository.CreateTransaction(ctx, &entity.Transaction{
+		transaction, err = u.transactionRepository.CreateTransaction(txCtx, &entity.Transaction{
 			RecipientWalletID: recipientWallet.ID,
 			Amount:            body.Amount,
 			SourceOfFunds:     body.SourceOfFunds,
@@ -138,4 +139,13 @@ func (u *transactionUseCaseImpl) TopUpBalance(ctx context.Context, body *entity.
 		return nil, err
 	}
 	return transaction, nil
+}
+
+func (u *transactionUseCaseImpl) GetTransaction(ctx context.Context, params entity.TransactionFilter, userID int64) ([]entity.Transaction, error) {
+	var transactions []entity.Transaction
+	transactions, err := u.transactionRepository.GetAllTransactions(ctx, userID, params)
+	if err != nil {
+		return nil, err
+	}
+	return transactions, nil
 }
