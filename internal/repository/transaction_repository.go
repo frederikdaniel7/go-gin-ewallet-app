@@ -7,6 +7,7 @@ import (
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
+	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/constant"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/database"
 )
 
@@ -36,7 +37,7 @@ func (r *transactionRepository) CreateTransaction(ctx context.Context, body *ent
 	err := runner.QueryRowContext(ctx, q, body.SenderWalletID, body.RecipientWalletID, body.Amount, body.SourceOfFunds, body.Descriptions).
 		Scan(&transaction.ID, &transaction.SenderWalletID, &transaction.RecipientWalletID, &transaction.Amount, &transaction.SourceOfFunds, &transaction.Descriptions, &transaction.CreatedAt)
 	if err != nil {
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error())
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
 	}
 	return &transaction, nil
 

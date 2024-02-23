@@ -9,7 +9,7 @@ import (
 
 type Transaction struct {
 	ID                int64        `json:"id"`
-	SenderWalletID    int64        `json:"sender_wallet_id"`
+	SenderWalletID    *int64       `json:"sender_wallet_id"`
 	RecipientWalletID int64        `json:"recipient_wallet_id"`
 	Amount            d.Decimal    `json:"amount"`
 	SourceOfFunds     string       `json:"source_of_funds"`
@@ -23,4 +23,9 @@ type Transfer struct {
 	RecipientWalletNumber string  `json:"to" binding:"required,number,len=13,startswith=420"`
 	Amount                float64 `json:"amount" binding:"required,min=1000,max=50000000"`
 	Descriptions          string  `json:"description" binding:"required"`
+}
+
+type TopUpBody struct {
+	Amount        float64 `json:"amount" binding:"required,min=50000,max=50000000"`
+	SourceOfFunds int     `json:"source_of_funds" binding:"required,min=1,max=4"`
 }

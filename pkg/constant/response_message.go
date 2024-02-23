@@ -12,10 +12,10 @@ const (
 	ResponseMsgInvalidToken             = "Invalid Token"
 	ResponseMsgInvalidPasswordInput     = "Password minimum length must be at least 8 characters"
 	ResponseMsgInvalidEmailInput        = "Put the correct email format"
-
-	ResponseMsgInsufficientFunds = "Insufficient Balance for Transfer"
-	ResponseMsgUnauthorized      = "Unauthorized"
-	ResponseMsgCreated           = "Created"
+	ResponseMsgCannotTransferToSelf     = "Not Allowed To Transfer To Yourself"
+	ResponseMsgInsufficientFunds        = "Insufficient Balance for Transfer"
+	ResponseMsgUnauthorized             = "Unauthorized"
+	ResponseMsgCreated                  = "Created"
 
 	ResponseMsgUserAlreadyExists = "user already exists"
 	ResponseMsgUserDoesNotExist  = "user does not exist"

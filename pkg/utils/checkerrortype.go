@@ -18,5 +18,5 @@ func CheckError(errMap string) string {
 	} else if strings.Contains(errMap, constant.ErrDescriptionField) || strings.Contains(errMap, "description") {
 		return constant.ResponsemsgInvalidDescriptionField
 	}
-	return ""
+	return constant.ResponseMsgInvalidBody
 }

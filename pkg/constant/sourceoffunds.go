@@ -2,8 +2,10 @@ package constant
 
 const (
 	SourceWallet       = "Wallet"
-	SourceBankTransfer = "BankTransfer"
-	SourceCreditCard   = "CreditCard"
+	SourceBankTransfer = "Bank Transfer"
+	SourceCreditCard   = "Credit Card"
 	SourceCash         = "Cash"
 	SourceReward       = "Reward"
+
+	DescTopUp = "Top Up from "
 )

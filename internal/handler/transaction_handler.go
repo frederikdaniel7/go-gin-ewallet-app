@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/dto"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
@@ -22,6 +23,14 @@ func NewTransactionHandler(transactionUseCase usecase.TransactionUseCase) *Trans
 	}
 }
 
+var mapSourceFunds = map[int]string{
+	1: constant.SourceBankTransfer,
+	2: constant.SourceCreditCard,
+	3: constant.SourceCash,
+	4: constant.SourceReward,
+	5: constant.SourceWallet,
+}
+
 func (h *TransactionHandler) Transfer(ctx *gin.Context) {
 	var body dto.Transfer
 	userId := ctx.GetFloat64("id")
@@ -39,6 +48,38 @@ func (h *TransactionHandler) Transfer(ctx *gin.Context) {
 		RecipientWalletNumber: utils.ConvertWalletNumber(body.RecipientWalletNumber),
 		Amount:                amountDecimal,
 		Descriptions:          body.Descriptions,
+	}, int64(userId))
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	transactionJson := utils.ConvertTransactiontoJson(*transaction)
+	ctx.JSON(http.StatusCreated, dto.Response{
+		Msg:  constant.ResponseMsgCreated,
+		Data: transactionJson,
+	})
+}
+
+func (h *TransactionHandler) TopUpBalance(ctx *gin.Context) {
+	var body dto.TopUpBody
+	userId := ctx.GetFloat64("id")
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		errType := utils.CheckError(err.Error())
+		ctx.AbortWithStatusJSON(http.StatusBadRequest,
+			dto.Response{
+				Msg:  errType,
+				Data: nil,
+			})
+		return
+	}
+	var sbDesc strings.Builder
+	sbDesc.WriteString(constant.DescTopUp)
+	sbDesc.WriteString(mapSourceFunds[body.SourceOfFunds])
+	amountDecimal := decimal.NewFromFloat(body.Amount)
+	transaction, err := h.transactionUseCase.TopUpBalance(ctx, &entity.Transfer{
+		SourceOfFunds: mapSourceFunds[body.SourceOfFunds],
+		Amount:        amountDecimal,
+		Descriptions:  sbDesc.String(),
 	}, int64(userId))
 	if err != nil {
 		ctx.Error(err)

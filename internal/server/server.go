@@ -23,6 +23,7 @@ func SetupRouter(opt *HandlerOpts) *gin.Engine {
 
 	router.Use(middleware.AuthHandler)
 	router.POST("/transactions/transfer", opt.Transaction.Transfer)
+	router.POST("/transactions/topup", opt.Transaction.TopUpBalance)
 	return router
 
 }

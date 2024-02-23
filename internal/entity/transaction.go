@@ -9,7 +9,7 @@ import (
 
 type Transaction struct {
 	ID                int64
-	SenderWalletID    int64
+	SenderWalletID    *int64
 	RecipientWalletID int64
 	Amount            d.Decimal
 	SourceOfFunds     string
@@ -22,6 +22,7 @@ type Transaction struct {
 type Transfer struct {
 	RecipientWalletNumber string
 	Amount                d.Decimal
+	SourceOfFunds         string
 	Descriptions          string
 }
 
