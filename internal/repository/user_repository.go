@@ -18,7 +18,8 @@ type UserRepository interface {
 	// FindUserById(ctx context.Context, id int64) (*entity.User, error)
 	FindUserByEmail(ctx context.Context, email string) (*entity.User, error)
 	CreateUser(ctx context.Context, body *entity.User) (*entity.User, error)
-	FindUserPassword(ctx context.Context, body entity.User) (string, error)
+	FindUserPassword(ctx context.Context, body *entity.User) (string, error)
+	UpdateUserPassword(ctx context.Context, body *entity.User, password string) (*entity.User, error)
 }
 
 type userRepository struct {
@@ -59,11 +60,11 @@ func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*en
 		if err == sql.ErrNoRows {
 			return &user, nil
 		}
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error())
 	}
 	return &user, nil
 }
-func (r *userRepository) FindUserPassword(ctx context.Context, body entity.User) (string, error) {
+func (r *userRepository) FindUserPassword(ctx context.Context, body *entity.User) (string, error) {
 
 	q := `SELECT password from users where email = $1 `
 
@@ -77,5 +78,18 @@ func (r *userRepository) FindUserPassword(ctx context.Context, body entity.User)
 		return "", apperror.NewInternalErrorType(http.StatusUnauthorized, constant.ResponseMsgErrorCredentials)
 	}
 	return password, nil
+}
 
+func (r *userRepository) UpdateUserPassword(ctx context.Context, body *entity.User, password string) (*entity.User, error) {
+	var user entity.User
+	q := `UPDATE users SET password = $1 where email = $2 RETURNING id, email, name, created_at, updated_at`
+
+	err := r.db.QueryRowContext(ctx, q, password, body.Email).Scan(&user.ID, &user.Email, &user.Name, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &user, nil
+		}
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+	}
+	return &user, nil
 }

@@ -28,3 +28,11 @@ func ConvertUserDetailtoJson(user entity.UserDetail) dto.UserDetail {
 	}
 	return converted
 }
+
+func ConvertTokentoJson(token entity.PasswordToken) dto.PasswordToken {
+	converted := dto.PasswordToken{
+		Token:     token.Token,
+		ExpiredAt: token.ExpiredAt,
+	}
+	return converted
+}

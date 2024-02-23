@@ -13,25 +13,29 @@ import (
 )
 
 type UserUseCase interface {
-	Login(ctx context.Context, body entity.User) (int, error)
+	Login(ctx context.Context, body *entity.User) (int, error)
 	RegisterUser(ctx context.Context, body *entity.User) (*entity.UserDetail, error)
+	GenerateToken(ctx context.Context, body *entity.User) (*entity.PasswordToken, error)
 }
 
 type userUseCaseImpl struct {
-	userRepository   repository.UserRepository
-	walletRepository repository.WalletRepository
-	transactor       database.Transactor
+	userRepository          repository.UserRepository
+	walletRepository        repository.WalletRepository
+	passwordTokenRepository repository.PasswordTokenRepository
+	transactor              database.Transactor
 }
 
 func NewUserUseCaseImpl(
 	userRepository repository.UserRepository,
 	walletRespository repository.WalletRepository,
+	passwordTokenRepository repository.PasswordTokenRepository,
 	transactor database.Transactor,
 ) *userUseCaseImpl {
 	return &userUseCaseImpl{
-		userRepository:   userRepository,
-		walletRepository: walletRespository,
-		transactor:       transactor,
+		userRepository:          userRepository,
+		walletRepository:        walletRespository,
+		passwordTokenRepository: passwordTokenRepository,
+		transactor:              transactor,
 	}
 }
 func (u *userUseCaseImpl) RegisterUser(ctx context.Context, body *entity.User) (*entity.UserDetail, error) {
@@ -73,7 +77,7 @@ func (u *userUseCaseImpl) RegisterUser(ctx context.Context, body *entity.User) (
 	}, nil
 }
 
-func (u *userUseCaseImpl) Login(ctx context.Context, body entity.User) (int, error) {
+func (u *userUseCaseImpl) Login(ctx context.Context, body *entity.User) (int, error) {
 	user, err := u.userRepository.FindUserByEmail(ctx, body.Email)
 	if user.Email == "" {
 		return 0, apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgUserDoesNotExist)
@@ -93,4 +97,38 @@ func (u *userUseCaseImpl) Login(ctx context.Context, body entity.User) (int, err
 		return 0, apperror.NewCredentialsErrorType(http.StatusUnauthorized, constant.ResponseMsgErrorCredentials)
 	}
 	return int(user.ID), err
+}
+
+func (u *userUseCaseImpl) GenerateToken(ctx context.Context, body *entity.User) (*entity.PasswordToken, error) {
+	var token *entity.PasswordToken
+
+	err := u.transactor.WithinTransaction(ctx, func(txCtx context.Context) error {
+		checkUserExist, err := u.userRepository.FindUserByEmail(txCtx, body.Email)
+		if err != nil {
+			return err
+		}
+		if checkUserExist.Email == "" {
+			return apperror.NewUserErrorType(http.StatusBadRequest, constant.ResponseMsgUserDoesNotExist)
+		}
+		oldToken, err := u.passwordTokenRepository.CheckToken(txCtx, checkUserExist)
+		if err != nil {
+			return err
+		}
+		if !oldToken.DeletedAt.Valid {
+			_, err = u.passwordTokenRepository.UpdateDeleteToken(txCtx, checkUserExist, oldToken.Token)
+			if err != nil {
+				return err
+			}
+		}
+		token, err = u.passwordTokenRepository.CreateToken(txCtx, checkUserExist)
+		if err != nil {
+			return err
+		}
+		return nil
+
+	})
+	if err != nil {
+		return nil, err
+	}
+	return token, nil
 }

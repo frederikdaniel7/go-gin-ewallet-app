@@ -63,7 +63,7 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 			})
 		return
 	}
-	id, err := h.userUseCase.Login(ctx, entity.User{
+	id, err := h.userUseCase.Login(ctx, &entity.User{
 		Email:    body.Email,
 		Password: body.Password,
 	})
@@ -84,4 +84,31 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 		},
 	})
 
+}
+
+func (h *UserHandler) ForgotPassword(ctx *gin.Context) {
+	var body dto.CreatePasswordToken
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		errType := utils.CheckError(err.Error())
+		ctx.AbortWithStatusJSON(http.StatusBadRequest,
+			dto.Response{
+				Msg:  errType,
+				Data: nil,
+			})
+		return
+	}
+	token, err := h.userUseCase.GenerateToken(ctx, &entity.User{
+		Email: body.Email,
+	})
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	tokenJson := utils.ConvertTokentoJson(*token)
+	ctx.JSON(http.StatusCreated, dto.Response{
+		Msg: constant.ResponseMsgCreated,
+		Data: dto.PassTokenObj{
+			Token: tokenJson,
+		},
+	})
 }

@@ -17,7 +17,7 @@ func SetupRouter(opt *HandlerOpts) *gin.Engine {
 
 	router.POST("/users", opt.User.CreateUser)
 	router.POST("/login", opt.User.Login)
-
+	router.POST("/password/forgot", opt.User.ForgotPassword)
 	return router
 
 }

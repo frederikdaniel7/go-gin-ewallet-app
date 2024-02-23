@@ -18,9 +18,11 @@ func main() {
 
 	userRepository := repository.NewUserRepository(db)
 	walletRepository := repository.NewWalletRepository(db)
+	passwordTokenRepository := repository.NewPasswordTokenRepository(db)
 	transactor := database.NewTransaction(db)
 
-	userUseCase := usecase.NewUserUseCaseImpl(userRepository, walletRepository, transactor)
+	userUseCase := usecase.NewUserUseCaseImpl(
+		userRepository, walletRepository, passwordTokenRepository, transactor)
 
 	userHandler := handler.NewUserHandler(userUseCase)
 
