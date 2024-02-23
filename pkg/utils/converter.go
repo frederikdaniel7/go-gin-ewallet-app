@@ -144,7 +144,10 @@ func ConvertQueryParamstoSql(params entity.TransactionFilter) (string, []interfa
 		countParams++
 	}
 	if params.Page != nil {
-		setLimit := *params.Limit
+		setLimit := 0
+		if params.Limit != nil {
+			setLimit = *params.Limit
+		}
 		if params.Limit == nil {
 			setLimit = 10
 		}

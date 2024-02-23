@@ -146,6 +146,7 @@ func (u *transactionUseCaseImpl) GetTransaction(ctx context.Context, params enti
 	var transactions []entity.Transaction
 	var countData int
 	var defaultLimit = 10
+	var defaultPage = 1
 	transactions, err := u.transactionRepository.GetAllTransactions(ctx, userID, params)
 	if err != nil {
 		return nil, err
@@ -156,6 +157,9 @@ func (u *transactionUseCaseImpl) GetTransaction(ctx context.Context, params enti
 	}
 	if params.Limit == nil {
 		params.Limit = &defaultLimit
+	}
+	if params.Page == nil {
+		params.Page = &defaultPage
 	}
 	return &entity.TransactionPage{
 		Transactions: transactions,
