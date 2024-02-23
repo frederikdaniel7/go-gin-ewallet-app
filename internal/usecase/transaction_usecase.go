@@ -62,6 +62,10 @@ func (u *transactionUseCaseImpl) MakeTransfer(ctx context.Context, body *entity.
 		if senderWallet.Balance.LessThan(body.Amount) {
 			return apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgInsufficientFunds, debug.Stack())
 		}
+		_, err = u.walletRepository.UpdateDecreaseWalletBalance(txCtx, senderWallet, body.Amount)
+		if err != nil {
+			return err
+		}
 		recipientWallet, err = u.walletRepository.FindWalletByWalletNumber(txCtx, body.RecipientWalletNumber)
 		if recipientWallet == nil {
 			return err
@@ -72,15 +76,11 @@ func (u *transactionUseCaseImpl) MakeTransfer(ctx context.Context, body *entity.
 		if senderWallet.ID == recipientWallet.ID {
 			return apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgCannotTransferToSelf, debug.Stack())
 		}
-		_, err = u.walletRepository.UpdateDecreaseWalletBalance(txCtx, senderWallet, body.Amount)
-		if err != nil {
-			return err
-		}
 		_, err = u.walletRepository.UpdateAddWalletBalance(txCtx, recipientWallet, body.Amount)
 		if err != nil {
 			return err
 		}
-		transaction, err = u.transactionRepository.CreateTransaction(ctx, &entity.Transaction{
+		transaction, err = u.transactionRepository.CreateTransaction(txCtx, &entity.Transaction{
 			SenderWalletID:    &senderWallet.ID,
 			RecipientWalletID: recipientWallet.ID,
 			Amount:            body.Amount,

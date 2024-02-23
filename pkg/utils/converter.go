@@ -42,7 +42,11 @@ func ConvertWalletNumber(walletNum string) string {
 }
 
 func ConvertTransactiontoJson(transaction entity.Transaction) dto.Transaction {
-	senderWalletNumber := 4200000000000 + *transaction.SenderWalletID
+	var senderWalletNumber int64
+	if transaction.SenderWalletID != nil {
+		senderWalletNumber = 4200000000000 + *transaction.SenderWalletID
+	}
+
 	recipientWalletNumber := 4200000000000 + transaction.RecipientWalletID
 	converted := dto.Transaction{
 		ID:                transaction.ID,
@@ -61,7 +65,10 @@ func ConvertTransactionstoJson(transactions []entity.Transaction) []dto.Transact
 	transactionsJson := []dto.Transaction{}
 
 	for _, values := range transactions {
-		senderWalletNumber := 4200000000000 + *values.SenderWalletID
+		var senderWalletNumber int64
+		if values.SenderWalletID != nil {
+			senderWalletNumber = 4200000000000 + *values.SenderWalletID
+		}
 		RecipientWalletNumber := 4200000000000 + values.RecipientWalletID
 		transactionsJson = append(transactionsJson, dto.Transaction{
 			ID:                values.ID,
