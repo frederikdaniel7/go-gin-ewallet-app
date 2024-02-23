@@ -63,26 +63,26 @@ INSERT INTO wallets(user_id,wallet_number, balance) VALUES
 (4,  10000000),
 (5,  10000000);
 
-insert into transactions (sender_wallet_id, recipient_wallet_id, amount, source_of_funds, descriptions) values
-(1,2,200000,'Wallet','test1'),
-(1,2,300000,'Wallet','test2'),
-(1,2,400000,'Wallet','test3'),
-(1,2,500000,'Wallet','test4'),
-(1,2,600000,'Wallet','test5'),
-(2,1,600000,'Wallet','test6'),
-(2,1,500000,'Wallet','test7'),
-(2,1,400000,'Wallet','test8'),
-(2,1,300000,'Wallet','test9'),
-(2,1,200000,'Wallet','test10'),
-(3,4,200000,'Bank Transfer','test1'),
-(3,4,300000,'Bank Transfer','test2'),
-(3,4,400000,'Bank Transfer','test3'),
-(3,4,500000,'Bank Transfer','test4'),
-(3,4,600000,'Bank Transfer','test5'),
-(4,3,600000,'Credit Card','test6'),
-(4,3,500000,'Credit Card','test7'),
-(4,3,400000,'Credit Card','test8'),
-(4,3,300000,'Credit Card','test9'),
-(4,3,200000,'Credit Card','test10');
+insert into transactions (sender_wallet_id, recipient_wallet_id, amount, source_of_funds, descriptions, created_at ) values
+(1,2,200000,'Wallet','test1', '2024-02-23 20:57:44.869'),
+(1,2,300000,'Wallet','test2', '2024-02-22 20:57:44.869'),
+(1,2,400000,'Wallet','test3', '2024-02-21 20:57:44.869'),
+(1,2,500000,'Wallet','test4', '2024-02-20 20:57:44.869'),
+(1,2,600000,'Wallet','test5', '2024-02-19 20:57:44.869'),
+(2,1,600000,'Wallet','test6', '2024-02-23 20:57:44.869'),
+(2,1,500000,'Wallet','test7', '2024-02-22 20:57:44.869'),
+(2,1,400000,'Wallet','test8', '2024-02-21 20:57:44.869'),
+(2,1,300000,'Wallet','test9', '2024-02-20 20:57:44.869'),
+(2,1,200000,'Wallet','test10', '2024-02-19 20:57:44.869'),
+(3,4,200000,'Bank Transfer','test1', '2024-02-23 20:57:44.869'),
+(3,4,300000,'Bank Transfer','test2', '2024-02-22 20:57:44.869'),
+(3,4,400000,'Bank Transfer','test3', '2024-02-21 20:57:44.869'),
+(3,4,500000,'Bank Transfer','test4', '2024-02-20 20:57:44.869'),
+(3,4,600000,'Bank Transfer','test5', '2024-02-19 20:57:44.869'),
+(4,3,600000,'Credit Card','test6', '2024-02-23 20:57:44.869'),
+(4,3,500000,'Credit Card','test7', '2024-02-22 20:57:44.869'),
+(4,3,400000,'Credit Card','test8', '2024-02-21 20:57:44.869'),
+(4,3,300000,'Credit Card','test9', '2024-02-20 20:57:44.869'),
+(4,3,200000,'Credit Card','test10', '2024-02-19 20:57:44.869');
 
 

@@ -1,0 +1,2 @@
+DATABASE_URL="host=[HOST] user=[USER] password=[PASSWORD] dbname=[DATABASE_NAME] port=[PORT] sslmode=[disable/enable] TimeZone=[TIMEZONE]"
+SECRET_KEY="[SECRET-KEY]"
