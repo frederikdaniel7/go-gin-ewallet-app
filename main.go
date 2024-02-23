@@ -39,9 +39,6 @@ func main() {
 		User:        userHandler,
 		Transaction: transactionHandler,
 	})
-	// if err := router.Run(":8081"); err != nil {
-	// 	log.Fatal(err)
-	// }
 
 	srv := &http.Server{
 		Addr:    ":8081",
@@ -58,13 +55,12 @@ func main() {
 	<-quit
 	log.Println("Shutdown Server ...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("Server Shutdown:", err)
 	}
 	<-ctx.Done()
-	log.Println("timeout of 5 seconds.")
 
 	log.Println("Server exiting")
 }

@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/debug"
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/dto"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
@@ -120,7 +121,7 @@ func (h *UserHandler) ResetPassword(ctx *gin.Context) {
 
 	err := ctx.ShouldBindUri(&tokenParam)
 	if err != nil {
-		apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgInvalidToken)
+		apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgInvalidToken, debug.Stack())
 		return
 	}
 	if err := ctx.ShouldBindJSON(&body); err != nil {

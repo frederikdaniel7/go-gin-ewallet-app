@@ -5,7 +5,6 @@ import (
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/dto"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/constant"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,7 +26,7 @@ func HandleError(c *gin.Context) {
 			{
 				c.AbortWithStatusJSON(http.StatusInternalServerError,
 					dto.Response{
-						Msg:  constant.ResponseMsgErrorInternal,
+						Msg:  err.Error(),
 						Data: nil,
 					})
 			}

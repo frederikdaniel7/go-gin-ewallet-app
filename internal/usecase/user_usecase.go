@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"net/http"
+	"runtime/debug"
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/repository"
@@ -49,7 +50,7 @@ func (u *userUseCaseImpl) RegisterUser(ctx context.Context, body *entity.User) (
 			return err
 		}
 		if checkUserExist.Email != "" && checkUserExist.Email == body.Email {
-			return apperror.NewUserErrorType(http.StatusBadRequest, constant.ResponseMsgUserAlreadyExists)
+			return apperror.NewUserErrorType(http.StatusBadRequest, constant.ResponseMsgUserAlreadyExists, debug.Stack())
 		}
 
 		user, err = u.userRepository.CreateUser(txCtx, body)
@@ -81,7 +82,7 @@ func (u *userUseCaseImpl) RegisterUser(ctx context.Context, body *entity.User) (
 func (u *userUseCaseImpl) Login(ctx context.Context, body *entity.User) (int, error) {
 	user, err := u.userRepository.FindUserByEmail(ctx, body.Email)
 	if user.Email == "" {
-		return 0, apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgUserDoesNotExist)
+		return 0, apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgUserDoesNotExist, debug.Stack())
 	}
 	if err != nil {
 		return 0, err
@@ -109,7 +110,7 @@ func (u *userUseCaseImpl) GenerateToken(ctx context.Context, body *entity.User) 
 			return err
 		}
 		if checkUserExist.Email == "" {
-			return apperror.NewUserErrorType(http.StatusBadRequest, constant.ResponseMsgUserDoesNotExist)
+			return apperror.NewUserErrorType(http.StatusBadRequest, constant.ResponseMsgUserDoesNotExist, debug.Stack())
 		}
 		oldToken, err := u.passwordTokenRepository.CheckToken(txCtx, checkUserExist)
 		if err != nil {

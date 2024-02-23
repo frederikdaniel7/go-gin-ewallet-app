@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/dto"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
@@ -94,7 +95,6 @@ func (h *TransactionHandler) TopUpBalance(ctx *gin.Context) {
 
 func (h *TransactionHandler) GetTransactions(ctx *gin.Context) {
 	var params dto.TransactionFilter
-	transactionsJson := []dto.Transaction{}
 	userId := ctx.GetFloat64("id")
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		errType := utils.CheckError(err.Error())
@@ -111,8 +111,9 @@ func (h *TransactionHandler) GetTransactions(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	transactionsJson = utils.ConvertTransactionstoJson(transactions)
 
+	transactionsJson := utils.ConvertTransactionstoJson(transactions)
+	time.Sleep(2 * time.Second)
 	ctx.JSON(http.StatusOK, dto.Response{
 		Msg:  constant.ResponseMsgOK,
 		Data: dto.Transactions{Transactions: transactionsJson},

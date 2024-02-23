@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"runtime/debug"
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
@@ -13,9 +14,6 @@ import (
 )
 
 type PasswordTokenRepository interface {
-	// FindAll(ctx context.Context) ([]entity.User, error)
-	// FindSimilarUserByName(ctx context.Context, name string) ([]entity.User, error)
-	// FindUserById(ctx context.Context, id int64) (*entity.User, error)
 	CheckToken(ctx context.Context, body *entity.User) (*entity.PasswordToken, error)
 	CreateToken(ctx context.Context, body *entity.User) (*entity.PasswordToken, error)
 	UpdateDeleteToken(ctx context.Context, body *entity.User, token string) (*entity.PasswordToken, error)
@@ -36,7 +34,7 @@ func (r *passwordTokenRepository) CreateToken(ctx context.Context, body *entity.
 
 	token, err := utils.GenerateRandomToken(32)
 	if err != nil {
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	runner := database.PickQuerier(ctx, r.db)
 
@@ -46,7 +44,7 @@ func (r *passwordTokenRepository) CreateToken(ctx context.Context, body *entity.
 
 	err = runner.QueryRowContext(ctx, q, body.ID, token).Scan(&passToken.ID, &passToken.UserID, &passToken.Token, &passToken.ExpiredAt, &passToken.CreatedAt, &passToken.UpdatedAt, &passToken.DeletedAt)
 	if err != nil {
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 
 	return &passToken, nil
@@ -62,7 +60,7 @@ func (r *passwordTokenRepository) CheckToken(ctx context.Context, body *entity.U
 		if err == sql.ErrNoRows {
 			return &passToken, nil
 		}
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	return &passToken, nil
 }
@@ -77,7 +75,7 @@ func (r *passwordTokenRepository) UpdateDeleteToken(ctx context.Context, body *e
 		if err == sql.ErrNoRows {
 			return &passToken, nil
 		}
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	return &passToken, nil
 }
@@ -94,7 +92,7 @@ func (r *passwordTokenRepository) GetValidToken(ctx context.Context, token strin
 
 			return &passToken, nil
 		}
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error())
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error(), debug.Stack())
 	}
 
 	return &passToken, nil

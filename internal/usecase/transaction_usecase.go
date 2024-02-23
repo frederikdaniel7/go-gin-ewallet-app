@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"runtime/debug"
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/repository"
@@ -59,7 +60,7 @@ func (u *transactionUseCaseImpl) MakeTransfer(ctx context.Context, body *entity.
 			return err
 		}
 		if senderWallet.Balance.LessThan(body.Amount) {
-			return apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgInsufficientFunds)
+			return apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgInsufficientFunds, debug.Stack())
 		}
 		recipientWallet, err = u.walletRepository.FindWalletByWalletNumber(txCtx, body.RecipientWalletNumber)
 		if recipientWallet == nil {
@@ -69,7 +70,7 @@ func (u *transactionUseCaseImpl) MakeTransfer(ctx context.Context, body *entity.
 			return err
 		}
 		if senderWallet.ID == recipientWallet.ID {
-			return apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgCannotTransferToSelf)
+			return apperror.NewInputErrorType(http.StatusBadRequest, constant.ResponseMsgCannotTransferToSelf, debug.Stack())
 		}
 		_, err = u.walletRepository.UpdateDecreaseWalletBalance(txCtx, senderWallet, body.Amount)
 		if err != nil {

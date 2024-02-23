@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"runtime/debug"
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
@@ -13,8 +14,6 @@ import (
 )
 
 type UserRepository interface {
-	// FindAll(ctx context.Context) ([]entity.User, error)
-	// FindSimilarUserByName(ctx context.Context, name string) ([]entity.User, error)
 	FindUserById(ctx context.Context, id int64) (*entity.User, error)
 	FindUserByEmail(ctx context.Context, email string) (*entity.User, error)
 	CreateUser(ctx context.Context, body *entity.User) (*entity.User, error)
@@ -44,7 +43,7 @@ func (r *userRepository) CreateUser(ctx context.Context, body *entity.User) (*en
 	returning id, email, name, created_at, updated_at, deleted_at`
 	err = runner.QueryRowContext(ctx, q, body.Email, body.Name, hashedPassword).Scan(&user.ID, &user.Email, &user.Name, &user.CreatedAt, &user.UpdatedAt, &user.DeletedAt)
 	if err != nil {
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	return &user, nil
 }
@@ -60,7 +59,7 @@ func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*en
 		if err == sql.ErrNoRows {
 			return &user, nil
 		}
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error())
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error(), debug.Stack())
 	}
 	return &user, nil
 }
@@ -76,7 +75,7 @@ func (r *userRepository) FindUserById(ctx context.Context, id int64) (*entity.Us
 		if err == sql.ErrNoRows {
 			return &user, nil
 		}
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error())
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, err.Error(), debug.Stack())
 	}
 	return &user, nil
 }
@@ -91,7 +90,7 @@ func (r *userRepository) FindUserPassword(ctx context.Context, body *entity.User
 		if err == sql.ErrNoRows {
 			return password, nil
 		}
-		return "", apperror.NewInternalErrorType(http.StatusUnauthorized, constant.ResponseMsgErrorCredentials)
+		return "", apperror.NewInternalErrorType(http.StatusUnauthorized, constant.ResponseMsgErrorCredentials, debug.Stack())
 	}
 	return password, nil
 }
@@ -109,7 +108,7 @@ func (r *userRepository) UpdateUserPassword(ctx context.Context, body *entity.Us
 		if err == sql.ErrNoRows {
 			return &user, nil
 		}
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	return &user, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"runtime/debug"
 	"strings"
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
@@ -40,7 +41,7 @@ func (r *transactionRepository) CreateTransaction(ctx context.Context, body *ent
 	err := runner.QueryRowContext(ctx, q, body.SenderWalletID, body.RecipientWalletID, body.Amount, body.SourceOfFunds, body.Descriptions).
 		Scan(&transaction.ID, &transaction.SenderWalletID, &transaction.RecipientWalletID, &transaction.Amount, &transaction.SourceOfFunds, &transaction.Descriptions, &transaction.CreatedAt)
 	if err != nil {
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	return &transaction, nil
 
@@ -59,20 +60,20 @@ func (r *transactionRepository) GetAllTransactions(ctx context.Context, userID i
 	data = append(data, dataParams...)
 	rows, err := runner.QueryContext(ctx, sb.String(), data...)
 	if err != nil {
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	defer rows.Close()
 	for rows.Next() {
 		transaction := entity.Transaction{}
 		err := rows.Scan(&transaction.ID, &transaction.SenderWalletID, &transaction.RecipientWalletID, &transaction.Amount, &transaction.SourceOfFunds, &transaction.Descriptions, &transaction.CreatedAt, &transaction.UpdatedAt, &transaction.DeletedAt)
 		if err != nil {
-			return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+			return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 		}
 		transactions = append(transactions, transaction)
 	}
 	err = rows.Err()
 	if err != nil {
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 
 	return transactions, nil

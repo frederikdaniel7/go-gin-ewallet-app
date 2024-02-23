@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"runtime/debug"
 
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
 	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
@@ -39,7 +40,7 @@ func (r *walletRepository) CreateWallet(ctx context.Context, body *entity.User) 
 
 	err := runner.QueryRowContext(ctx, q, body.ID).Scan(&wallet.ID, &wallet.UserID, &wallet.WalletNumber, &wallet.Balance, &wallet.CreatedAt, &wallet.UpdatedAt, &wallet.DeletedAt)
 	if err != nil {
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	return &wallet, nil
 }
@@ -52,9 +53,9 @@ func (r *walletRepository) FindWalletByUserID(ctx context.Context, userID int64)
 	err := runner.QueryRowContext(ctx, q, userID).Scan(&wallet.ID, &wallet.UserID, &wallet.WalletNumber, &wallet.Balance, &wallet.CreatedAt, &wallet.UpdatedAt, &wallet.DeletedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgUserDoesNotExist)
+			return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgUserDoesNotExist, debug.Stack())
 		}
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	return &wallet, nil
 }
@@ -68,9 +69,9 @@ func (r *walletRepository) FindWalletByWalletNumber(ctx context.Context, walletN
 	err := runner.QueryRowContext(ctx, q, walletNumber).Scan(&wallet.ID, &wallet.UserID, &wallet.WalletNumber, &wallet.Balance, &wallet.CreatedAt, &wallet.UpdatedAt, &wallet.DeletedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgUserDoesNotExist)
+			return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgUserDoesNotExist, debug.Stack())
 		}
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	return &wallet, nil
 }
@@ -84,7 +85,7 @@ func (r *walletRepository) UpdateAddWalletBalance(ctx context.Context, w *entity
 	err := runner.QueryRowContext(ctx, q, amount, w.ID).
 		Scan(&wallet.ID, &wallet.UserID, &wallet.WalletNumber, &wallet.Balance, &wallet.CreatedAt, &wallet.UpdatedAt, &wallet.DeletedAt)
 	if err != nil {
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	return &wallet, nil
 }
@@ -98,7 +99,7 @@ func (r *walletRepository) UpdateDecreaseWalletBalance(ctx context.Context, w *e
 	err := runner.QueryRowContext(ctx, q, amount, w.ID).
 		Scan(&wallet.ID, &wallet.UserID, &wallet.WalletNumber, &wallet.Balance, &wallet.CreatedAt, &wallet.UpdatedAt, &wallet.DeletedAt)
 	if err != nil {
-		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal)
+		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 	}
 	return &wallet, nil
 }
