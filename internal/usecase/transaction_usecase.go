@@ -16,7 +16,7 @@ import (
 type TransactionUseCase interface {
 	MakeTransfer(ctx context.Context, body *entity.Transfer, userID int64) (*entity.Transaction, error)
 	TopUpBalance(ctx context.Context, body *entity.Transfer, userID int64) (*entity.Transaction, error)
-	GetTransaction(ctx context.Context, params entity.TransactionFilter, userID int64) ([]entity.Transaction, error)
+	GetTransaction(ctx context.Context, params entity.TransactionFilter, userID int64) (*entity.TransactionPage, error)
 }
 
 type transactionUseCaseImpl struct {
@@ -142,11 +142,25 @@ func (u *transactionUseCaseImpl) TopUpBalance(ctx context.Context, body *entity.
 	return transaction, nil
 }
 
-func (u *transactionUseCaseImpl) GetTransaction(ctx context.Context, params entity.TransactionFilter, userID int64) ([]entity.Transaction, error) {
+func (u *transactionUseCaseImpl) GetTransaction(ctx context.Context, params entity.TransactionFilter, userID int64) (*entity.TransactionPage, error) {
 	var transactions []entity.Transaction
+	var countData int
+	var defaultLimit = 10
 	transactions, err := u.transactionRepository.GetAllTransactions(ctx, userID, params)
 	if err != nil {
 		return nil, err
 	}
-	return transactions, nil
+	countData, err = u.transactionRepository.CountAllTransactions(ctx, userID, params)
+	if err != nil {
+		return nil, err
+	}
+	if params.Limit == nil {
+		params.Limit = &defaultLimit
+	}
+	return &entity.TransactionPage{
+		Transactions: transactions,
+		ItemCount:    countData,
+		PageCount:    countData / *params.Limit,
+		CurrentPage:  *params.Page,
+	}, nil
 }

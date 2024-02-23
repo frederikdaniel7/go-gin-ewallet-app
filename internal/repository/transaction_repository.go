@@ -17,6 +17,7 @@ import (
 type TransactionRepository interface {
 	CreateTransaction(ctx context.Context, body *entity.Transaction) (*entity.Transaction, error)
 	GetAllTransactions(ctx context.Context, userID int64, filter entity.TransactionFilter) ([]entity.Transaction, error)
+	CountAllTransactions(ctx context.Context, userID int64, filter entity.TransactionFilter) (int, error)
 }
 
 type transactionRepository struct {
@@ -48,7 +49,6 @@ func (r *transactionRepository) CreateTransaction(ctx context.Context, body *ent
 }
 
 func (r *transactionRepository) GetAllTransactions(ctx context.Context, userID int64, filter entity.TransactionFilter) ([]entity.Transaction, error) {
-	//page := 1
 	var sb strings.Builder
 	transactions := []entity.Transaction{}
 	runner := database.PickQuerier(ctx, r.db)
@@ -77,4 +77,22 @@ func (r *transactionRepository) GetAllTransactions(ctx context.Context, userID i
 	}
 
 	return transactions, nil
+}
+
+func (r *transactionRepository) CountAllTransactions(ctx context.Context, userID int64, filter entity.TransactionFilter) (int, error) {
+	var sb strings.Builder
+	var dataCount int
+	runner := database.PickQuerier(ctx, r.db)
+	var data []interface{}
+	sb.WriteString(`SELECT COUNT (*) from transactions t JOIN wallets w ON w.id = t.sender_wallet_id OR w.id = t.recipient_wallet_id where w.user_id = $1`)
+	data = append(data, userID)
+	queryString, dataParams := utils.ConvertQueryParamstoSqlforCount(filter)
+	sb.WriteString(queryString)
+	data = append(data, dataParams...)
+	err := runner.QueryRowContext(ctx, sb.String(), data...).Scan(&dataCount)
+	if err != nil {
+		return 0, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
+	}
+
+	return dataCount, nil
 }

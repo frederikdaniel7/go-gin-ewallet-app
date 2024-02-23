@@ -36,7 +36,6 @@ func Logger(log *logrus.Logger) func(c *gin.Context) {
 			"path":        path,
 		})
 
-		// we responds with server errors
 		if statusCode >= 500 && statusCode <= 599 {
 			var appErr *apperror.ErrorType
 			for _, err := range c.Errors {

@@ -8,14 +8,16 @@ import (
 
 type Transaction struct {
 	ID                int64     `json:"id"`
-	SenderWalletID    *int64    `json:"sender_wallet_id"`
-	RecipientWalletID int64     `json:"recipient_wallet_id"`
+	SenderWalletID    *int64    `json:"sender_wallet_number"`
+	RecipientWalletID int64     `json:"recipient_wallet_number"`
 	Amount            d.Decimal `json:"amount"`
 	SourceOfFunds     string    `json:"source_of_funds"`
 	Descriptions      string    `json:"descriptions"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
 }
+
+
 
 type Transactions struct {
 	Transactions []Transaction `json:"transactions"`
@@ -24,12 +26,19 @@ type Transactions struct {
 type Transfer struct {
 	RecipientWalletNumber string  `json:"to" binding:"required,number,len=13,startswith=420"`
 	Amount                float64 `json:"amount" binding:"required,min=1000,max=50000000"`
-	Descriptions          string  `json:"description" binding:"required"`
+	Descriptions          string  `json:"description" binding:"required,max=35"`
 }
 
 type TopUpBody struct {
 	Amount        float64 `json:"amount" binding:"required,min=50000,max=50000000"`
 	SourceOfFunds int     `json:"source_of_funds" binding:"required,min=1,max=4"`
+}
+
+type TransactionPage struct {
+	Transactions Transactions `json:"transactions"`
+	ItemCount    int          `json:"item_count"`
+	PageCount    int          `json:"page_count"`
+	CurrentPage  int          `json:"current_page"`
 }
 
 type TransactionFilter struct {

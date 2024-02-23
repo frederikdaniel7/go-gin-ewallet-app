@@ -42,10 +42,12 @@ func ConvertWalletNumber(walletNum string) string {
 }
 
 func ConvertTransactiontoJson(transaction entity.Transaction) dto.Transaction {
+	senderWalletNumber := 4200000000000 + *transaction.SenderWalletID
+	recipientWalletNumber := 4200000000000 + transaction.RecipientWalletID
 	converted := dto.Transaction{
 		ID:                transaction.ID,
-		SenderWalletID:    transaction.SenderWalletID,
-		RecipientWalletID: transaction.RecipientWalletID,
+		SenderWalletID:    &senderWalletNumber,
+		RecipientWalletID: recipientWalletNumber,
 		Amount:            transaction.Amount,
 		SourceOfFunds:     transaction.SourceOfFunds,
 		Descriptions:      transaction.Descriptions,
@@ -57,11 +59,14 @@ func ConvertTransactiontoJson(transaction entity.Transaction) dto.Transaction {
 
 func ConvertTransactionstoJson(transactions []entity.Transaction) []dto.Transaction {
 	transactionsJson := []dto.Transaction{}
+
 	for _, values := range transactions {
+		senderWalletNumber := 4200000000000 + *values.SenderWalletID
+		RecipientWalletNumber := 4200000000000 + values.RecipientWalletID
 		transactionsJson = append(transactionsJson, dto.Transaction{
 			ID:                values.ID,
-			SenderWalletID:    values.SenderWalletID,
-			RecipientWalletID: values.RecipientWalletID,
+			SenderWalletID:    &senderWalletNumber,
+			RecipientWalletID: RecipientWalletNumber,
 			Amount:            values.Amount,
 			SourceOfFunds:     values.SourceOfFunds,
 			Descriptions:      values.Descriptions,
@@ -126,6 +131,46 @@ func ConvertQueryParamstoSql(params entity.TransactionFilter) (string, []interfa
 			query.WriteString(` DESC`)
 		}
 	}
+	if params.Limit != nil {
+		query.WriteString(fmt.Sprintf(` LIMIT $%v`, countParams))
+		filters = append(filters, *params.Limit)
+		countParams++
+	}
+	if params.Page != nil {
+		setLimit := *params.Limit
+		if params.Limit == nil {
+			setLimit = 10
+		}
+		query.WriteString(fmt.Sprintf(` OFFSET $%v`, countParams))
+		filters = append(filters, (*params.Page-1)*setLimit)
+		countParams++
+	}
+	return query.String(), filters
+
+}
+
+func ConvertQueryParamstoSqlforCount(params entity.TransactionFilter) (string, []interface{}) {
+	var query strings.Builder
+
+	var filters []interface{}
+	var countParams = 2
+
+	if params.Search != "" {
+		query.WriteString(fmt.Sprintf(` AND t.descriptions ILIKE '%%' ||$%v|| '%%'`, countParams))
+		filters = append(filters, params.Search)
+		countParams++
+	}
+	if params.StartDate != "" {
+		query.WriteString(fmt.Sprintf(` AND t.created_at >= $%v`, countParams))
+		filters = append(filters, params.StartDate)
+		countParams++
+	}
+	if params.EndDate != "" {
+		query.WriteString(fmt.Sprintf(` AND t.created_at <= $%v`, countParams))
+		filters = append(filters, params.EndDate)
+		countParams++
+	}
+
 	return query.String(), filters
 
 }

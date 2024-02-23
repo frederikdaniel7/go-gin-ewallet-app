@@ -26,6 +26,13 @@ type Transfer struct {
 	Descriptions          string
 }
 
+type TransactionPage struct {
+	Transactions []Transaction
+	ItemCount    int
+	PageCount    int
+	CurrentPage  int
+}
+
 type TransactionFilter struct {
 	Search    string
 	SortBy    string

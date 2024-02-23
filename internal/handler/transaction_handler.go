@@ -106,17 +106,24 @@ func (h *TransactionHandler) GetTransactions(ctx *gin.Context) {
 		return
 	}
 	convertedParams := utils.ConvertQueryJsonToObject(params)
-	transactions, err := h.transactionUseCase.GetTransaction(ctx, convertedParams, int64(userId))
+	transactionsPage, err := h.transactionUseCase.GetTransaction(ctx, convertedParams, int64(userId))
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
 
-	transactionsJson := utils.ConvertTransactionstoJson(transactions)
+	transactionsJson := utils.ConvertTransactionstoJson(transactionsPage.Transactions)
 	time.Sleep(2 * time.Second)
 	ctx.JSON(http.StatusOK, dto.Response{
-		Msg:  constant.ResponseMsgOK,
-		Data: dto.Transactions{Transactions: transactionsJson},
+		Msg: constant.ResponseMsgOK,
+		Data: dto.TransactionPage{
+			Transactions: dto.Transactions{
+				Transactions: transactionsJson,
+			},
+			ItemCount:   transactionsPage.ItemCount,
+			PageCount:   transactionsPage.PageCount,
+			CurrentPage: transactionsPage.CurrentPage,
+		},
 	})
 
 }
