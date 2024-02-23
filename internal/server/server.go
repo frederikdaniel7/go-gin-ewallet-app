@@ -7,7 +7,8 @@ import (
 )
 
 type HandlerOpts struct {
-	User *handler.UserHandler
+	User        *handler.UserHandler
+	Transaction *handler.TransactionHandler
 }
 
 func SetupRouter(opt *HandlerOpts) *gin.Engine {
@@ -19,6 +20,9 @@ func SetupRouter(opt *HandlerOpts) *gin.Engine {
 	router.POST("/login", opt.User.Login)
 	router.POST("/password/forgot", opt.User.ForgotPassword)
 	router.PATCH("/password/:token", opt.User.ResetPassword)
+
+	router.Use(middleware.AuthHandler)
+	router.POST("/transactions/transfer", opt.Transaction.Transfer)
 	return router
 
 }

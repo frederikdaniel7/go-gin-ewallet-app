@@ -19,15 +19,19 @@ func main() {
 	userRepository := repository.NewUserRepository(db)
 	walletRepository := repository.NewWalletRepository(db)
 	passwordTokenRepository := repository.NewPasswordTokenRepository(db)
+	transactionRepository := repository.NewTransactionRepository(db)
+
 	transactor := database.NewTransaction(db)
 
 	userUseCase := usecase.NewUserUseCaseImpl(
 		userRepository, walletRepository, passwordTokenRepository, transactor)
+	transactionUseCase := usecase.NewTransactionUseCaseImpl(userRepository, walletRepository, transactionRepository, transactor)
 
 	userHandler := handler.NewUserHandler(userUseCase)
-
+	transactionHandler := handler.NewTransactionHandler(transactionUseCase)
 	router := server.SetupRouter(&server.HandlerOpts{
-		User: userHandler,
+		User:        userHandler,
+		Transaction: transactionHandler,
 	})
 	if err := router.Run(":8081"); err != nil {
 		log.Fatal(err)

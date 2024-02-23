@@ -36,3 +36,20 @@ func ConvertTokentoJson(token entity.PasswordToken) dto.PasswordToken {
 	}
 	return converted
 }
+func ConvertWalletNumber(walletNum string) string {
+	return walletNum[3:13]
+}
+
+func ConvertTransactiontoJson(transaction entity.Transaction) dto.Transaction {
+	converted := dto.Transaction{
+		ID:                transaction.ID,
+		SenderWalletID:    transaction.SenderWalletID,
+		RecipientWalletID: transaction.RecipientWalletID,
+		Amount:            transaction.Amount,
+		SourceOfFunds:     transaction.SourceOfFunds,
+		Descriptions:      transaction.Descriptions,
+		CreatedAt:         transaction.CreatedAt,
+		UpdatedAt:         transaction.UpdatedAt,
+	}
+	return converted
+}
