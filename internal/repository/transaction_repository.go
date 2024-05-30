@@ -7,11 +7,11 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/constant"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/database"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/utils"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/entity"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/apperror"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/constant"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/database"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/utils"
 )
 
 type TransactionRepository interface {
@@ -53,7 +53,13 @@ func (r *transactionRepository) GetAllTransactions(ctx context.Context, userID i
 	transactions := []entity.Transaction{}
 	runner := database.PickQuerier(ctx, r.db)
 	var data []interface{}
-	sb.WriteString(`SELECT t.id, t.sender_wallet_id, t.recipient_wallet_id,t.amount, t.source_of_funds, t.descriptions,t.created_at,t.updated_at,t.deleted_at from transactions t JOIN wallets w ON w.id = t.sender_wallet_id OR w.id = t.recipient_wallet_id where w.user_id = $1`)
+	sb.WriteString(`SELECT t.id, ws.wallet_number, us.name as sender_name, wr.wallet_number, ur.name as recipient_name,t.amount, t.source_of_funds, t.descriptions,t.created_at,t.updated_at,t.deleted_at from transactions t 
+	JOIN wallets w ON w.id = t.sender_wallet_id OR w.id = t.recipient_wallet_id
+	LEFT JOIN wallets ws ON t.sender_wallet_id = ws.id 
+	LEFT JOIN wallets wr ON t.recipient_wallet_id = wr.id
+	LEFT JOIN users us ON us.id = t.sender_wallet_id  
+	LEFT JOIN users ur ON ur.id = t.recipient_wallet_id 
+	where w.user_id = $1`)
 	data = append(data, userID)
 	queryString, dataParams := utils.ConvertQueryParamstoSql(filter)
 	sb.WriteString(queryString)
@@ -65,12 +71,14 @@ func (r *transactionRepository) GetAllTransactions(ctx context.Context, userID i
 	defer rows.Close()
 	for rows.Next() {
 		transaction := entity.Transaction{}
-		err := rows.Scan(&transaction.ID, &transaction.SenderWalletID, &transaction.RecipientWalletID, &transaction.Amount, &transaction.SourceOfFunds, &transaction.Descriptions, &transaction.CreatedAt, &transaction.UpdatedAt, &transaction.DeletedAt)
+		err := rows.Scan(&transaction.ID, &transaction.SenderWalletID, &transaction.SenderName, &transaction.RecipientWalletID, &transaction.RecipientName, &transaction.Amount, &transaction.SourceOfFunds, &transaction.Descriptions, &transaction.CreatedAt, &transaction.UpdatedAt, &transaction.DeletedAt)
 		if err != nil {
 			return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())
 		}
 		transactions = append(transactions, transaction)
+		// log.Printf("transaction %#v",transaction.RecipientName )
 	}
+
 	err = rows.Err()
 	if err != nil {
 		return nil, apperror.NewInternalErrorType(http.StatusInternalServerError, constant.ResponseMsgErrorInternal, debug.Stack())

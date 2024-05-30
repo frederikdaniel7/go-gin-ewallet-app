@@ -9,11 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/handler"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/repository"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/server"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/usecase"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/database"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/handler"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/repository"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/server"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/usecase"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/database"
 )
 
 func main() {
@@ -39,9 +39,6 @@ func main() {
 		User:        userHandler,
 		Transaction: transactionHandler,
 	})
-	// if err := router.Run(":8081"); err != nil {
-	// 	log.Fatal(err)
-	// }
 
 	srv := &http.Server{
 		Addr:    ":8080",
@@ -65,6 +62,6 @@ func main() {
 	}
 	<-ctx.Done()
 	log.Println("timeout of 5 seconds.")
-	
+
 	log.Println("Server exiting")
 }

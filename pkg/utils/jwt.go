@@ -11,7 +11,7 @@ func CreateAndSign(userId int, secretKey string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":  userId,
 		"iss": "the-issuer",
-		"exp": time.Now().Add(30 * time.Minute).Unix(),
+		"exp": time.Now().Add(60 * time.Minute).Unix(),
 		"iat": time.Now().Unix(),
 	})
 

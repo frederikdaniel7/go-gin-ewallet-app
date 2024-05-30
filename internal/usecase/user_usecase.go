@@ -5,17 +5,18 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/repository"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/constant"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/database"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/utils"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/entity"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/repository"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/apperror"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/constant"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/database"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/utils"
 )
 
 type UserUseCase interface {
 	Login(ctx context.Context, body *entity.User) (int, error)
 	RegisterUser(ctx context.Context, body *entity.User) (*entity.UserDetail, error)
+	GetUserDetails(ctx context.Context, userID int64) (*entity.UserDetail, error)
 	GenerateToken(ctx context.Context, body *entity.User) (*entity.PasswordToken, error)
 	ResetPassword(ctx context.Context, body *entity.PasswordToken, newPassword string) error
 }
@@ -99,6 +100,26 @@ func (u *userUseCaseImpl) Login(ctx context.Context, body *entity.User) (int, er
 		return 0, apperror.NewCredentialsErrorType(http.StatusUnauthorized, constant.ResponseMsgErrorCredentials)
 	}
 	return int(user.ID), err
+}
+
+func (u *userUseCaseImpl) GetUserDetails(ctx context.Context, userID int64) (*entity.UserDetail, error) {
+	user, err := u.userRepository.FindUserById(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	wallet, err := u.walletRepository.FindWalletByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return &entity.UserDetail{
+		ID:        user.ID,
+		Email:     user.Email,
+		Name:      user.Name,
+		Wallet:    wallet,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		DeletedAt: user.DeletedAt,
+	}, nil
 }
 
 func (u *userUseCaseImpl) GenerateToken(ctx context.Context, body *entity.User) (*entity.PasswordToken, error) {

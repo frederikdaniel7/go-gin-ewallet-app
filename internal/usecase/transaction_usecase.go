@@ -2,15 +2,18 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"log"
+
+	"math"
 	"net/http"
 	"runtime/debug"
 
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/repository"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/constant"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/database"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/entity"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/repository"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/apperror"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/constant"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/database"
 )
 
 type TransactionUseCase interface {
@@ -104,7 +107,7 @@ func (u *transactionUseCaseImpl) TopUpBalance(ctx context.Context, body *entity.
 	var user *entity.User
 	var recipientWallet *entity.Wallet
 	var transaction *entity.Transaction
-	log.Println(userID)
+
 	user, err := u.userRepository.FindUserById(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -145,26 +148,49 @@ func (u *transactionUseCaseImpl) TopUpBalance(ctx context.Context, body *entity.
 func (u *transactionUseCaseImpl) GetTransaction(ctx context.Context, params entity.TransactionFilter, userID int64) (*entity.TransactionPage, error) {
 	var transactions []entity.Transaction
 	var countData int
-	var defaultLimit = 10
+	pageCount := 1.0
 	var defaultPage = 1
-	transactions, err := u.transactionRepository.GetAllTransactions(ctx, userID, params)
+	countData, err := u.transactionRepository.CountAllTransactions(ctx, userID, params)
 	if err != nil {
 		return nil, err
 	}
-	countData, err = u.transactionRepository.CountAllTransactions(ctx, userID, params)
-	if err != nil {
-		return nil, err
+
+	if params.Limit != nil {
+		pageCount = float64(countData) / float64(*params.Limit)
 	}
-	if params.Limit == nil {
-		params.Limit = &defaultLimit
+
+	pageCountInt := 1
+	if math.RoundToEven(pageCount) < pageCount {
+		pageCountInt = int(math.RoundToEven(pageCount)) + 1
+		log.Printf(fmt.Sprintf("page count: %v", pageCountInt))
+	} else if math.RoundToEven(pageCount) > pageCount {
+		pageCountInt = int(math.RoundToEven(pageCount))
+	} else {
+		pageCountInt = int((pageCount))
 	}
-	if params.Page == nil {
+
+	if params.Page == nil || *params.Page > pageCountInt {
 		params.Page = &defaultPage
 	}
+	log.Printf(fmt.Sprintf("page count: %v", pageCountInt))
+	transactions, err = u.transactionRepository.GetAllTransactions(ctx, userID, entity.TransactionFilter{
+		Search:          params.Search,
+		SortBy:          params.SortBy,
+		Order:           params.Order,
+		Transactiontype: params.Transactiontype,
+		Page:            params.Page,
+		Limit:           params.Limit,
+		StartDate:       params.StartDate,
+		EndDate:         params.EndDate,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &entity.TransactionPage{
 		Transactions: transactions,
 		ItemCount:    countData,
-		PageCount:    countData / *params.Limit,
+		PageCount:    pageCountInt,
 		CurrentPage:  *params.Page,
 	}, nil
 }

@@ -9,7 +9,9 @@ import (
 type Transaction struct {
 	ID                int64     `json:"id"`
 	SenderWalletID    *int64    `json:"sender_wallet_number"`
+	SenderName        *string   `json:"sender_name"`
 	RecipientWalletID int64     `json:"recipient_wallet_number"`
+	RecipientName     string    `json:"recipient_name"`
 	Amount            d.Decimal `json:"amount"`
 	SourceOfFunds     string    `json:"source_of_funds"`
 	Descriptions      string    `json:"descriptions"`
@@ -17,10 +19,12 @@ type Transaction struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 }
 
-
-
 type Transactions struct {
 	Transactions []Transaction `json:"transactions"`
+}
+
+type TransactionObj struct {
+	Transaction Transaction `json:"transaction"`
 }
 
 type Transfer struct {
@@ -42,11 +46,12 @@ type TransactionPage struct {
 }
 
 type TransactionFilter struct {
-	Search    string `form:"s"`
-	SortBy    string `form:"sort_by" binding:"omitempty,oneof='amount' 'date' 'to'"`
-	Order     string `form:"order" binding:"omitempty,oneof='asc' 'desc'"`
-	Page      *int   `form:"page" binding:"omitempty,min=1"`
-	Limit     *int   `form:"limit" binding:"omitempty,min=1"`
-	StartDate string `form:"start" binding:"omitempty,datetime=2006-01-02"`
-	EndDate   string `form:"end" binding:"omitempty,datetime=2006-01-02"`
+	Search          string `form:"s"`
+	SortBy          string `form:"sort_by" binding:"omitempty,oneof='amount' 'date' 'to'"`
+	Order           string `form:"order" binding:"omitempty,oneof='asc' 'desc'"`
+	Transactiontype string `form:"txtype" binding:"omitempty,oneof='transfer' 'topup' 'all'"`
+	Page            *int   `form:"page" binding:"omitempty,min=1"`
+	Limit           *int   `form:"limit" binding:"omitempty,min=1"`
+	StartDate       string `form:"start" binding:"omitempty,datetime=2006-01-02"`
+	EndDate         string `form:"end" binding:"omitempty,datetime=2006-01-02"`
 }

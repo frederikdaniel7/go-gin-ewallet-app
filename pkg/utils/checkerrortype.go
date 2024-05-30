@@ -3,7 +3,7 @@ package utils
 import (
 	"strings"
 
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/constant"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/constant"
 )
 
 func CheckError(errMap string) string {

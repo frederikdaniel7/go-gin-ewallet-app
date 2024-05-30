@@ -6,12 +6,12 @@ import (
 	"os"
 	"runtime/debug"
 
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/dto"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/usecase"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/constant"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/utils"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/dto"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/entity"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/usecase"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/apperror"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/constant"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -86,6 +86,22 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 		},
 	})
 
+}
+
+func (h *UserHandler) GetUserDetails(ctx *gin.Context) {
+	userId := ctx.GetFloat64("id")
+	user, err := h.userUseCase.GetUserDetails(ctx, int64(userId))
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	userJson := utils.ConvertUserDetailtoJson(*user)
+	ctx.JSON(http.StatusAccepted, dto.Response{
+		Msg: constant.ResponseMsgOK,
+		Data: dto.UserObj{
+			User: userJson,
+		},
+	})
 }
 
 func (h *UserHandler) ForgotPassword(ctx *gin.Context) {

@@ -3,13 +3,12 @@ package handler
 import (
 	"net/http"
 	"strings"
-	"time"
 
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/dto"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/usecase"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/constant"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/utils"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/dto"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/entity"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/usecase"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/constant"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 )
@@ -56,8 +55,10 @@ func (h *TransactionHandler) Transfer(ctx *gin.Context) {
 	}
 	transactionJson := utils.ConvertTransactiontoJson(*transaction)
 	ctx.JSON(http.StatusCreated, dto.Response{
-		Msg:  constant.ResponseMsgCreated,
-		Data: transactionJson,
+		Msg: constant.ResponseMsgCreated,
+		Data: dto.TransactionObj{
+			Transaction: transactionJson,
+		},
 	})
 }
 
@@ -88,8 +89,9 @@ func (h *TransactionHandler) TopUpBalance(ctx *gin.Context) {
 	}
 	transactionJson := utils.ConvertTransactiontoJson(*transaction)
 	ctx.JSON(http.StatusCreated, dto.Response{
-		Msg:  constant.ResponseMsgCreated,
-		Data: transactionJson,
+		Msg: constant.ResponseMsgCreated,
+		Data: dto.TransactionObj{
+			Transaction: transactionJson},
 	})
 }
 
@@ -113,7 +115,6 @@ func (h *TransactionHandler) GetTransactions(ctx *gin.Context) {
 	}
 
 	transactionsJson := utils.ConvertTransactionstoJson(transactionsPage.Transactions)
-	time.Sleep(2 * time.Second)
 	ctx.JSON(http.StatusOK, dto.Response{
 		Msg: constant.ResponseMsgOK,
 		Data: dto.TransactionPage{

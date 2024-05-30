@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/dto"
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/internal/entity"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/dto"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/internal/entity"
 )
 
 func ConvertUserDetailtoJson(user entity.UserDetail) dto.UserDetail {
@@ -73,7 +73,9 @@ func ConvertTransactionstoJson(transactions []entity.Transaction) []dto.Transact
 		transactionsJson = append(transactionsJson, dto.Transaction{
 			ID:                values.ID,
 			SenderWalletID:    &senderWalletNumber,
+			SenderName:        values.SenderName,
 			RecipientWalletID: RecipientWalletNumber,
+			RecipientName:     values.RecipientName,
 			Amount:            values.Amount,
 			SourceOfFunds:     values.SourceOfFunds,
 			Descriptions:      values.Descriptions,
@@ -85,14 +87,16 @@ func ConvertTransactionstoJson(transactions []entity.Transaction) []dto.Transact
 }
 
 func ConvertQueryJsonToObject(queryParams dto.TransactionFilter) entity.TransactionFilter {
+
 	converted := entity.TransactionFilter{
-		Search:    queryParams.Search,
-		SortBy:    queryParams.SortBy,
-		Order:     queryParams.Order,
-		Page:      queryParams.Page,
-		Limit:     queryParams.Limit,
-		StartDate: queryParams.StartDate,
-		EndDate:   queryParams.EndDate,
+		Search:          queryParams.Search,
+		SortBy:          queryParams.SortBy,
+		Order:           queryParams.Order,
+		Transactiontype: queryParams.Transactiontype,
+		Page:            queryParams.Page,
+		Limit:           queryParams.Limit,
+		StartDate:       queryParams.StartDate,
+		EndDate:         queryParams.EndDate,
 	}
 	return converted
 }
@@ -118,6 +122,15 @@ func ConvertQueryParamstoSql(params entity.TransactionFilter) (string, []interfa
 		filters = append(filters, params.EndDate)
 		countParams++
 	}
+
+	if params.Transactiontype == "transfer" {
+		query.WriteString(` AND t.sender_wallet_id is not null`)
+	} else if params.Transactiontype == "topup" {
+		query.WriteString(` AND t.sender_wallet_id is null`)
+	} else if params.Transactiontype == "all" {
+		query.WriteString(` `)
+	}
+
 	if params.SortBy != "" {
 		switch params.SortBy {
 		case "to":
@@ -130,6 +143,7 @@ func ConvertQueryParamstoSql(params entity.TransactionFilter) (string, []interfa
 	} else if params.SortBy == "" {
 		query.WriteString(` ORDER BY t.created_at`)
 	}
+
 	if params.Order != "" {
 		if params.Order == "asc" {
 			query.WriteString(` ASC`)
@@ -138,11 +152,13 @@ func ConvertQueryParamstoSql(params entity.TransactionFilter) (string, []interfa
 			query.WriteString(` DESC`)
 		}
 	}
+
 	if params.Limit != nil {
 		query.WriteString(fmt.Sprintf(` LIMIT $%v`, countParams))
 		filters = append(filters, *params.Limit)
 		countParams++
 	}
+
 	if params.Page != nil {
 		setLimit := 0
 		if params.Limit != nil {
@@ -155,6 +171,7 @@ func ConvertQueryParamstoSql(params entity.TransactionFilter) (string, []interfa
 		filters = append(filters, (*params.Page-1)*setLimit)
 		countParams++
 	}
+
 	return query.String(), filters
 
 }
@@ -170,11 +187,19 @@ func ConvertQueryParamstoSqlforCount(params entity.TransactionFilter) (string, [
 		filters = append(filters, params.Search)
 		countParams++
 	}
+	if params.Transactiontype == "transfer" {
+		query.WriteString(` AND t.sender_wallet_id is not null`)
+	} else if params.Transactiontype == "topup" {
+		query.WriteString(` AND t.sender_wallet_id is null`)
+	} else if params.Transactiontype == "all" {
+		query.WriteString(` `)
+	}
 	if params.StartDate != "" {
 		query.WriteString(fmt.Sprintf(` AND t.created_at >= $%v`, countParams))
 		filters = append(filters, params.StartDate)
 		countParams++
 	}
+
 	if params.EndDate != "" {
 		query.WriteString(fmt.Sprintf(` AND t.created_at <= $%v`, countParams))
 		filters = append(filters, params.EndDate)

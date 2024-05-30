@@ -37,7 +37,7 @@ func PickQuerier(ctx context.Context, db *sql.DB) Querier {
 		return querier
 	} else {
 		querier = db
-	}
+	} 
 
 	return querier
 }

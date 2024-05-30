@@ -10,7 +10,9 @@ import (
 type Transaction struct {
 	ID                int64
 	SenderWalletID    *int64
+	SenderName		  *string
 	RecipientWalletID int64
+	RecipientName     string
 	Amount            d.Decimal
 	SourceOfFunds     string
 	Descriptions      string
@@ -37,6 +39,7 @@ type TransactionFilter struct {
 	Search    string
 	SortBy    string
 	Order     string
+	Transactiontype string
 	Page      *int
 	Limit     *int
 	StartDate string

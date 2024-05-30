@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"git.garena.com/sea-labs-id/bootcamp/batch-03/frederik-hutabarat/assignment-go-rest-api/pkg/apperror"
+	"github.com/frederikdaniel7/go-gin-ewallet-app/pkg/apperror"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
